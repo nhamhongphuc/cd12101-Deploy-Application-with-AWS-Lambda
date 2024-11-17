@@ -4,7 +4,6 @@ plugins:
   - serverless-dynamodb-local
   - serverless-offline
   - serverless-iam-roles-per-function
-  - serverless-reqvalidator-plugin
 
 frameworkVersion: '3'
 
@@ -14,10 +13,21 @@ provider:
   region: ${opt:region, 'us-east-1'}
   tracing:
     lambda: true
+    apiGateway: true
   environment:
     TODOS_TABLE: Todos
     TODOS_USER_INDEX: TodosUserIndex
     IMAGES_S3_BUCKET: udagram-images-project4
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "s3:*"
+      Resource: arn:aws:s3:::${self:provider.environment.IMAGES_S3_BUCKET}/*
+    - Effect: Allow
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+      Resource: "*"
 
 functions:
 
@@ -46,7 +56,6 @@ functions:
           method: post
           authorizer: Auth
           path: todos
-          reqValidatorName: RequestBodyValidator
           request:
             schemas:
               application/json: ${file(models/create-todo-model.json)}
@@ -64,7 +73,6 @@ functions:
           method: patch
           authorizer: Auth
           path: todos/{todoId}
-          reqValidatorName: RequestBodyValidator
           request:
             schemas:
               application/json: ${file(models/update-todo-model.json)}
@@ -181,15 +189,6 @@ resources:
                 - DELETE
                 - HEAD
               MaxAge: 3000
-
-    RequestBodyValidator:
-      Type: AWS::ApiGateway::RequestValidator
-      Properties:
-        Name: 'request-body-validator'
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        ValidateRequestBody: true
-        ValidateRequestParameters: false
 
     BucketPolicy:
       Type: AWS::S3::BucketPolicy

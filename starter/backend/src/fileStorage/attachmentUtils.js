@@ -3,10 +3,12 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { v4 as uuidv4 } from 'uuid'
 import { parseUserId } from '../auth/utils.js'
+import { createLogger } from '../auth/utils.js'
 
 const s3Client = new S3Client()
 const bucketName = process.env.IMAGES_S3_BUCKET
 const urlExpiration = 100000
+const logger = createLogger('utils')
 
 function getUserId(event) {
   const authorization = event.headers.Authorization
@@ -29,7 +31,7 @@ export async function handler(event) {
 
   try {
     const result = await updatedTodoImageUrlDb(todoId, createdAt, attachmentUrl)
-    console.log('Update result:', JSON.stringify(result, null, 2))
+    logger.info('Update result:', JSON.stringify(result, null, 2))
 
     return {
       statusCode: 200,

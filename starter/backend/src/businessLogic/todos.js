@@ -7,6 +7,8 @@ import {
   deleteTodoDb
 } from '../dataLayer/todosAccess.js'
 import * as uuid from 'uuid'
+import { createLogger } from '../auth/utils.js'
+const logger = createLogger('utils')
 
 function getUserId(event) {
   const authorization = event.headers.Authorization
@@ -83,17 +85,17 @@ export async function updatedTodo(event) {
 export async function deleteTodo(event) {
   const todoId = event.pathParameters.todoId
   const userId = getUserId(event)
-  console.log('todoId', todoId)
-  console.log('userId', userId)
+  logger.info('todoId', todoId)
+  logger.info('userId', userId)
 
   const item = await getTodo(userId, todoId)
-  console.log('item', item)
+  logger.info('item', item)
   const createdAt = item.createdAt
-  console.log('createdAt', createdAt)
+  logger.info('createdAt', createdAt)
 
   try {
     const itemDelete = await deleteTodoDb(todoId, createdAt)
-    console.log('Delete succeeded:', itemDelete)
+    logger.info('Delete succeeded:', itemDelete)
     return {
       statusCode: 200,
       headers: {
@@ -105,7 +107,7 @@ export async function deleteTodo(event) {
       })
     }
   } catch (error) {
-    console.error('Error deleting item:', error)
+    logger.error('Error deleting item:', error)
     return {
       statusCode: 500,
       body: JSON.stringify({

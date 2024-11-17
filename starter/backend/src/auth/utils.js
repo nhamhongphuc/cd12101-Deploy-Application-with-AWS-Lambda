@@ -2,7 +2,7 @@ import { decode } from 'jsonwebtoken'
 import jsonwebtoken from 'jsonwebtoken'
 import winston from 'winston'
 
-function createLogger(loggerName) {
+export function createLogger(loggerName) {
   return winston.createLogger({
     level: 'info',
     format: winston.format.json(),
@@ -48,7 +48,7 @@ export async function handler(event) {
   try {
     const jwtToken = await verifyToken(event.authorizationToken)
 
-    console.log('jwtToken', jwtToken)
+    logger.info('jwtToken', jwtToken)
     return {
       principalId: jwtToken.sub,
       policyDocument: {

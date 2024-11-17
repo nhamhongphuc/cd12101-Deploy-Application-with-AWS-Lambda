@@ -1,11 +1,13 @@
 import AWSXRay from 'aws-xray-sdk-core'
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocument } from '@aws-sdk/lib-dynamodb'
+import { createLogger } from '../auth/utils.js'
 
 const dynamoDb = new DynamoDB()
 const dynamoDbXRay = AWSXRay.captureAWSv3Client(dynamoDb)
 const dynamoDbClient = DynamoDBDocument.from(dynamoDbXRay)
 const todosTable = process.env.TODOS_TABLE
+const logger = createLogger('utils')
 
 export async function createTodoDb(item) {
   await dynamoDbClient.put({
@@ -36,7 +38,7 @@ export async function getTodo(userId, todoId) {
       ':todoId': todoId
     }
   })
-  console.log('getTodo', getTodo)
+  logger.info('getTodo', getTodo)
   return getTodo.Items[0]
 }
 
