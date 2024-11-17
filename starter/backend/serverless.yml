@@ -11,9 +11,9 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs18.x
-
   region: ${opt:region, 'us-east-1'}
-
+  tracing:
+    lambda: true
   environment:
     TODOS_TABLE: Todos
     TODOS_USER_INDEX: TodosUserIndex
@@ -47,6 +47,9 @@ functions:
           authorizer: Auth
           path: todos
           reqValidatorName: RequestBodyValidator
+          request:
+            schemas:
+              application/json: ${file(models/create-todo-model.json)}
           cors: true
     iamRoleStatements:
       - Effect: Allow
@@ -62,6 +65,9 @@ functions:
           authorizer: Auth
           path: todos/{todoId}
           reqValidatorName: RequestBodyValidator
+          request:
+            schemas:
+              application/json: ${file(models/update-todo-model.json)}
           cors: true
     iamRoleStatements:
       - Effect: Allow
